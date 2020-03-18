@@ -1,91 +1,106 @@
 ;; Author: sgalella
-
-globals [N n1 n2 t]
+globals [population healthy cancer time]
 
 to setup
+  ;; Define environment conditions
   clear-all
-  clear-plot
   set-default-shape turtles "circle"
-  set t 1
-  create-turtles N0
-  set N N0
-  set n1 0
-  set n2 0
-  ask turtles [
+
+  ;; Initialization
+  set healthy initial-healthy
+  set cancer initial-cancer
+  set population initial-healthy + initial-cancer
+  set time 0
+  create-turtles population
+  ask turtles
+  [
     setxy random world-width random world-height
-    ifelse random-float 1 < prob-cancer
-      [ set color red set n1 n1 + 1 ]
-      [ set color green set n2 n2 + 1 ]
-      ]
-  reset-ticks
+    set color green
+  ]
+  ask n-of initial-cancer turtles with [color = green]
+  [
+      set color red
+  ]
   end
 
-to evolution
-  ask turtles [act]
-  set t t + 1
-  set N n1 + n2
-  print N
+to go
+  ;; Plot settings
+  set population count turtles
   set-current-plot-pen "cells"
-  plotxy t N
-  set-current-plot-pen "cancer"
-  plotxy t n1
+  plotxy time population
   set-current-plot-pen "healthy"
-  plotxy t n2
-end
+  plotxy time healthy
+  set-current-plot-pen "cancer"
+  plotxy time cancer
 
-to act
-  if color = red [
-    ask neighbors [
-      if count turtles-here = 0
-      [
-        if random-float 1 <= q1
-        [
-          sprout 1
-          [set color red]
-          set n1 n1 + 1
-        ]
-      ]
-    ]
-    if count turtles-here > 0 [
-      if random-float 1 <= p1
-      [
-        set n1 n1 - 1
-        die
-      ]
-   ]
-  ]
-
-  if color = green [
-    ask neighbors [
-      if count turtles-here = 0
-      [
-        if random-float 1 <= q2
-        [
-          sprout 1
-          [set color green]
-          set n2 n2 + 1
-        ]
-      ]
-    ]
-    if count turtles-here > 0
+  ;; Update
+  ask turtles
+  [
+    (ifelse
+    color = red
     [
-      if random-float 1 <= p2
+      ask neighbors
       [
-        set n2 n2 - 1
+        if count turtles-here = 0
+        [
+          if random-float 1 < gamma
+          [
+            sprout 1
+            [
+              set color red
+            ]
+            set cancer cancer + 1
+          ]
+        ]
+      ]
+      if random-float 1 < delta
+      [
+        set cancer cancer - 1
         die
       ]
     ]
+    color = green
+    [
+      ask neighbors
+      [
+        if count turtles-here = 0
+        [
+          if random-float 1 < alpha
+          [
+            sprout 1
+            [
+              set color green
+              set healthy healthy + 1
+            ]
+          ]
+        ]
+      ]
+      (ifelse
+      random-float 1 < beta
+      [
+        set healthy healthy - 1
+        die
+      ]
+      random-float 1 < epsilon
+      [
+       set color red
+       set cancer cancer + 1
+       set healthy healthy - 1
+      ])
+
+    ])
   ]
+  set time time + 1
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-795
-79
-1377
-662
+660
+57
+1173
+571
 -1
 -1
-18.52
+12.32
 1
 10
 1
@@ -95,10 +110,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--15
-15
--15
-15
+-20
+20
+-20
+20
 0
 0
 1
@@ -106,10 +121,10 @@ ticks
 30.0
 
 BUTTON
-483
-341
-608
-385
+158
+173
+275
+206
 NIL
 setup\n
 NIL
@@ -123,12 +138,12 @@ NIL
 1
 
 BUTTON
-624
-341
-749
-384
+158
+208
+275
+241
 NIL
-evolution\n
+go\n
 T
 1
 T
@@ -140,117 +155,57 @@ NIL
 1
 
 PLOT
-167
-422
-609
-666
-Population
+72
+316
+656
+570
+Cell Competence Moldel
 time
-number of cells
+population
 0.0
-10.0
+100.0
 0.0
-10.0
+100.0
 true
 true
 "" ""
 PENS
-"cancer" 1.0 0 -2674135 true "" ""
-"healthy" 1.0 0 -10899396 true "" ""
 "cells" 1.0 0 -16777216 true "" ""
-
-SLIDER
-484
-195
-611
-228
-N0
-N0
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
+"healthy" 1.0 0 -10899396 true "" ""
+"cancer" 1.0 0 -2674135 true "" ""
 
 TEXTBOX
-67
-90
-315
-126
+105
+53
+353
+89
 Cell Competence Model
-20
-0.0
-1
-
-TEXTBOX
-67
-125
-436
-439
-Healthy and cancer competence model\n\n\n\nN0: Number of intial cells\nprob-cancer: Probability of initial cancer cells\np1: Probability of dying cancer cell\np2: Probability of dying healthy cell\nq1: Probability of leaving offspring cancer cell\nq2: Probability of leaving offspring healthy cell\n\n\n\nsetup: Restart initial conditions\nevolution: Run the simulation
-15
-0.0
-1
-
-TEXTBOX
-67
-172
-217
-194
-Variables
-18
-25.0
-1
-
-TEXTBOX
-65
-334
-215
-356
-Commands
-18
+17
 25.0
 1
 
 SLIDER
-622
+349
+163
+498
 196
-749
-229
-prob-cancer
-prob-cancer
+epsilon
+epsilon
 0
 1
-0.5
 0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-484
-236
-610
-269
-p1
-p1
-0
-1
-0.0
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-622
-236
-750
-269
-q1
-q1
+349
+93
+498
+126
+alpha
+alpha
 0
 1
 0.5
@@ -260,71 +215,149 @@ NIL
 HORIZONTAL
 
 SLIDER
-484
-276
-611
-309
-p2
-p2
+500
+93
+650
+126
+beta
+beta
 0
 1
-0.0
+0.4
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-623
-278
-750
-311
-q2
-q2
+349
+128
+498
+161
+gamma
+gamma
 0
 1
-0.5
+0.1
 0.05
 1
 NIL
 HORIZONTAL
+
+SLIDER
+501
+128
+650
+161
+delta
+delta
+0
+1
+0.2
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+349
+57
+498
+90
+initial-healthy
+initial-healthy
+0
+250
+250.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+500
+57
+650
+90
+initial-cancer
+initial-cancer
+0
+250
+250.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+72
+269
+161
+314
+NIL
+population
+17
+1
+11
+
+MONITOR
+163
+269
+252
+314
+NIL
+healthy
+17
+1
+11
+
+MONITOR
+254
+269
+342
+314
+NIL
+cancer
+17
+1
+11
+
+TEXTBOX
+100
+83
+328
+163
+Check the model info tab to read more about the model, the parameters and other simulation settings.
+13
+0.0
+1
 
 @#$#@#$#@
-## WHAT IS IT?
+## MODEL
 
-This section could give a general understanding of what the model is trying to show or explain.
+Competence model between healthy and cancer cells.
 
-## HOW IT WORKS
+<p align="center">
+    <img width="500" height="300"src="images/Cell_Competence.jpg">
+</p>
 
-This section could explain what rules the agents use to create the overall behavior of the model.
+
+## PARAMETERS
+
+The initial populations of healthy and cancer cells can be set by moving the sliders.
+
+*alpha*: Probability of **healthy** to produce offspring.
+*beta*: Probability of **healthy** to perish.
+*gamma*: Probability of **cancer** to produce offspring.
+*delta*: Probability of **cancer** to perish.
+*epislon*: Probability of **healthy** to mutate into **cancer**.
+
 
 ## HOW TO USE IT
 
-This section could explain how to use the model, including a description of each of the items in the interface tab.
+Tune the parameters and press setup. To start and stop the simulation press go.
 
-## THINGS TO NOTICE
-
-This section could give some ideas of things for the user to notice while running the model.
-
-## THINGS TO TRY
-
-This section could give some ideas of things for the user to try to do (move sliders, switches, etc.) with the model.
-
-## EXTENDING THE MODEL
-
-This section could give some ideas of things to add or change in the procedures tab to make the model more complicated, detailed, accurate, etc.
-
-## NETLOGO FEATURES
-
-This section could point out any especially interesting or unusual features of NetLogo that the model makes use of, particularly in the Procedures tab.  It might also point out places where workarounds were needed because of missing features.
-
-## RELATED MODELS
-
-This section could give the names of models in the NetLogo Models Library or elsewhere which are of related interest.
-
-## CREDITS AND REFERENCES
-
-This section could contain a reference to the model's URL on the web if it has one, as well as any other necessary credits or references.
+Change the speed of simulation by sliding the model speed slider above.
 @#$#@#$#@
 default
 true
@@ -608,7 +641,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
