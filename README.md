@@ -18,3 +18,11 @@ Predator-prey model between two species.
     <img width="300" height="300"src="images/Lotka_Volterra.gif">
 </p>
 
+
+#### Belousov-Zhabotinsky Reaction
+
+Chemical reaction catalysis between three species.
+
+<p align="center">
+    <img width="300" height="300"src="images/Belousov_Zhabotinsky.gif">
+</p>
