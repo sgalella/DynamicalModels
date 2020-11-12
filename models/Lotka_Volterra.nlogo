@@ -1,106 +1,124 @@
 ;; Author: sgalella
-globals [population healthy cancer time]
+globals [population prey-population predator-population time]
+breed [predators predator]
+breed [preys prey]
 
 to setup
-  ;; Define environment conditions
-  clear-all
-  set-default-shape turtles "circle"
+ ;; Define environment conditions
+ clear-all
+ set-default-shape preys prey-shape
+ set-default-shape predators predator-shape
 
-  ;; Initialization
-  set healthy initial-healthy
-  set cancer initial-cancer
-  set population initial-healthy + initial-cancer
-  set time 0
-  create-turtles population
-  ask turtles
-  [
-    setxy random world-width random world-height
-    set color green
-  ]
-  ask n-of initial-cancer turtles with [color = green]
-  [
-      set color red
-  ]
-  end
+ ;; Initialization
+ set prey-population initial-prey
+ set predator-population initial-predator
+ set population prey-population + predator-population
+ set time 0
+ create-preys initial-prey
+ create-predators initial-predator
+ ask patches
+ [
+     set pcolor green
+ ]
+ ask preys
+ [
+   set color white
+   move-to one-of patches with [not any? preys-here]
+ ]
+ ask predators
+ [
+   set color black
+   move-to one-of patches with [not any? predators-here and not any? preys-here]
+ ]
+end
 
 to go
   ;; Plot settings
-  set population count turtles
-  set-current-plot-pen "cells"
-  plotxy time population
-  set-current-plot-pen "healthy"
-  plotxy time healthy
-  set-current-plot-pen "cancer"
-  plotxy time cancer
+  set-current-plot-pen "prey"
+  plotxy time prey-population
+  set-current-plot-pen "predator"
+  plotxy time predator-population
 
-  ;; Update
-  ask turtles
+  ;; Update preys
+  ask preys
   [
-    (ifelse
-    color = red
+    move-prey
+    if random-float 1 < alpha
     [
-      ask neighbors
+    ask one-of patches with [not any? predators-here and not any? preys-here]
+    [
+      sprout-preys 1
       [
-        if count turtles-here = 0
-        [
-          if random-float 1 < gamma
-          [
-            sprout 1
-            [
-              set color red
-            ]
-            set cancer cancer + 1
-          ]
-        ]
+        set color white
       ]
-      if random-float 1 < delta
+      set prey-population prey-population + 1
+    ]
+  ]
+    if count predators-here > 0
+    [
+      if random-float 1 < beta
       [
-        set cancer cancer - 1
+        set prey-population prey-population - 1
         die
       ]
     ]
-    color = green
+  ]
+
+  ;; Update predators
+  ask predators
+  [
+    move-predator
+    if count preys-here > 0
     [
-      ask neighbors
+      if random-float 1 < delta
       [
-        if count turtles-here = 0
+        ask one-of patches with [not any? predators-here and not any? preys-here]
         [
-          if random-float 1 < alpha
-          [
-            sprout 1
-            [
-              set color green
-              set healthy healthy + 1
-            ]
-          ]
+         sprout-predators 1
+         [
+           set color black
+         ]
+         set predator-population predator-population + 1
         ]
       ]
-      (ifelse
-      random-float 1 < beta
-      [
-        set healthy healthy - 1
-        die
-      ]
-      random-float 1 < epsilon
-      [
-       set color red
-       set cancer cancer + 1
-       set healthy healthy - 1
-      ])
-
-    ])
+    ]
+    if random-float 1 < gamma
+    [
+      set predator-population predator-population - 1
+      die
+    ]
   ]
   set time time + 1
 end
+
+to move-prey
+  carefully
+  [
+    move-to one-of neighbors with [count preys-here = 0]
+  ]
+  [
+    ;; Don't move
+  ]
+end
+
+to move-predator
+  carefully
+  [
+    move-to one-of neighbors with [count predators-here = 0 and count preys-here >= 0]
+  ]
+  [
+    ;; Don't move
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-660
-57
-1173
-571
+573
+26
+1113
+567
 -1
 -1
-12.32
+12.98
 1
 10
 1
@@ -116,17 +134,17 @@ GRAPHICS-WINDOW
 20
 0
 0
-1
-ticks
+0
+time
 30.0
 
 BUTTON
-158
-173
-275
-206
+98
+144
+222
+177
 NIL
-setup\n
+setup
 NIL
 1
 T
@@ -137,60 +155,101 @@ NIL
 NIL
 1
 
-BUTTON
-158
-208
-275
-241
-NIL
-go\n
-T
+SLIDER
+297
+99
+429
+132
+initial-prey
+initial-prey
+0
+500
+300.0
+10
 1
-T
-OBSERVER
 NIL
-NIL
-NIL
-NIL
+HORIZONTAL
+
+SLIDER
+431
+99
+562
+132
+initial-predator
+initial-predator
+0
+500
+100.0
+10
 1
+NIL
+HORIZONTAL
 
 PLOT
-72
-316
-656
-570
-Cell Competence Moldel
+46
+285
+567
+566
+Lotka-Volterra Model
 time
 population
 0.0
-100.0
+10.0
 0.0
-100.0
+10.0
 true
 true
 "" ""
 PENS
-"cells" 1.0 0 -16777216 true "" ""
-"healthy" 1.0 0 -10899396 true "" ""
-"cancer" 1.0 0 -2674135 true "" ""
+"prey" 1.0 0 -10899396 true "" ""
+"predator" 1.0 0 -2674135 true "" ""
 
-TEXTBOX
-105
-53
-353
-89
-Cell Competence Model
-17
-25.0
+BUTTON
+99
+181
+222
+214
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
+MONITOR
+185
+234
+326
+279
+predator-population
+predator-population
+17
+1
+11
+
+MONITOR
+339
+234
+470
+279
+prey-population
+prey-population
+17
+1
+11
+
 SLIDER
-349
-163
-498
-196
-epsilon
-epsilon
+297
+149
+429
+182
+alpha
+alpha
 0
 1
 0.1
@@ -200,12 +259,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-349
-93
-498
-126
-alpha
-alpha
+297
+183
+429
+216
+beta
+beta
 0
 1
 0.5
@@ -215,25 +274,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-500
-93
-650
-126
-beta
-beta
+431
+148
+562
+181
+delta
+delta
 0
 1
-0.4
+0.6
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-349
-128
-498
-161
+431
+184
+562
+217
 gamma
 gamma
 0
@@ -244,89 +303,52 @@ gamma
 NIL
 HORIZONTAL
 
-SLIDER
-501
-128
-650
-161
-delta
-delta
-0
-1
-0.2
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-349
-57
-498
-90
-initial-healthy
-initial-healthy
-0
-250
-250.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-500
-57
-650
-90
-initial-cancer
-initial-cancer
-0
-250
-250.0
-1
-1
-NIL
-HORIZONTAL
-
 MONITOR
-72
-269
-161
-314
-NIL
+45
+234
+173
+279
+population
 population
 17
 1
 11
 
-MONITOR
-163
-269
-252
-314
-NIL
-healthy
-17
-1
-11
+CHOOSER
+431
+38
+562
+83
+predator-shape
+predator-shape
+"wolf" "person"
+0
 
-MONITOR
-254
-269
-342
-314
-NIL
-cancer
-17
-1
-11
+CHOOSER
+297
+38
+429
+83
+prey-shape
+prey-shape
+"sheep" "fish" "cow"
+2
 
 TEXTBOX
-100
-83
-328
-163
+79
+34
+271
+72
+Lotka-Volterra Model
+17
+25.0
+1
+
+TEXTBOX
+81
+66
+269
+130
 Check the model info tab to read more about the model, the parameters and other simulation settings.
 13
 0.0
@@ -335,22 +357,20 @@ Check the model info tab to read more about the model, the parameters and other 
 @#$#@#$#@
 ## MODEL
 
-Competence model between healthy and cancer cells.
+The current script runs the Lotka-Volterra model, a predator-prey model.
 
 <p align="center">
-    <img width="500" height="300"src="images/Cell_Competence.jpg">
+    <img width="600" height="300" src="../images/Lotka_Volterra.jpg">
 </p>
-
 
 ## PARAMETERS
 
-The initial populations of healthy and cancer cells can be set by moving the sliders.
+Each population group begins with an initial population set by the user.
 
-*alpha*: Probability of **healthy** to produce offspring.
-*beta*: Probability of **healthy** to perish.
-*gamma*: Probability of **cancer** to produce offspring.
-*delta*: Probability of **cancer** to perish.
-*epislon*: Probability of **healthy** to mutate into **cancer**.
+*alpha*: Growth rate of **prey**.
+*beta*: Death rate of **prey** when encountering a **predator**.
+*delta*: Growth rate of **predator** when hunting **prey**.
+*gamma*: Death rate of **predator**.
 
 
 ## HOW TO USE IT
@@ -358,6 +378,11 @@ The initial populations of healthy and cancer cells can be set by moving the sli
 Tune the parameters and press setup. To start and stop the simulation press go.
 
 Change the speed of simulation by sliding the model speed slider above.
+
+
+## REFERENCES
+
+[Wikipedia: Lotka-Volterra Equation](https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations)
 @#$#@#$#@
 default
 true
@@ -551,6 +576,22 @@ Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
 
+sheep
+false
+15
+Circle -1 true true 203 65 88
+Circle -1 true true 70 65 162
+Circle -1 true true 150 105 120
+Polygon -7500403 true false 218 120 240 165 255 165 278 120
+Circle -7500403 true false 214 72 67
+Rectangle -1 true true 164 223 179 298
+Polygon -1 true true 45 285 30 285 30 240 15 195 45 210
+Circle -1 true true 3 83 150
+Rectangle -1 true true 65 221 80 296
+Polygon -1 true true 195 285 210 285 210 240 240 210 195 210
+Polygon -7500403 true false 276 85 285 105 302 99 294 83
+Polygon -7500403 true false 219 85 210 105 193 99 201 83
+
 square
 false
 0
@@ -634,6 +675,13 @@ Line -7500403 true 216 40 79 269
 Line -7500403 true 40 84 269 221
 Line -7500403 true 40 216 269 79
 Line -7500403 true 84 40 221 269
+
+wolf
+false
+0
+Polygon -16777216 true false 253 133 245 131 245 133
+Polygon -7500403 true true 2 194 13 197 30 191 38 193 38 205 20 226 20 257 27 265 38 266 40 260 31 253 31 230 60 206 68 198 75 209 66 228 65 243 82 261 84 268 100 267 103 261 77 239 79 231 100 207 98 196 119 201 143 202 160 195 166 210 172 213 173 238 167 251 160 248 154 265 169 264 178 247 186 240 198 260 200 271 217 271 219 262 207 258 195 230 192 198 210 184 227 164 242 144 259 145 284 151 277 141 293 140 299 134 297 127 273 119 270 105
+Polygon -7500403 true true -1 195 14 180 36 166 40 153 53 140 82 131 134 133 159 126 188 115 227 108 236 102 238 98 268 86 269 92 281 87 269 103 269 113
 
 x
 false
