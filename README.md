@@ -1,28 +1,17 @@
-# NetLogo Models
-A recopilation of different dynamical systems simulated in NetLogo.
+# Dynamical Models
+A recopilation of different models of dynamical systems simulated in NetLogo.
 
-#### Cell Competence
+1. [Cell competence](https://github.com/sgalella/DynamicalModels/blob/master/images/Cell_Competence.jpg)
 
-Competence model between healthy and cancer cells.
+2. [Lotka-Volterra model](https://en.wikipedia.org/wiki/Lotka–Volterra_equations)
 
-<p align="center">
-    <img width="300" height="300"src="images/Cell_Competence.gif">
-</p>
+3. [Belousov-Zhabotinsky reaction](https://en.wikipedia.org/wiki/Belousov–Zhabotinsky_reaction)
 
-
-#### Lotka–Volterra Model
-
-Predator-prey model between two species.
+   
 
 <p align="center">
-    <img width="300" height="300"src="images/Lotka_Volterra.gif">
+    <img width="200" height="200"src="images/Cell_Competence.gif">
+ 	  <img width="200" height="200"src="images/Lotka_Volterra.gif">
+  	<img width="200" height="200"src="images/Belousov_Zhabotinsky.gif">
 </p>
 
-
-#### Belousov-Zhabotinsky Reaction
-
-Chemical reaction catalysis between three species.
-
-<p align="center">
-    <img width="300" height="300"src="images/Belousov_Zhabotinsky.gif">
-</p>
