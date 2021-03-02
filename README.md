@@ -1,5 +1,5 @@
 # Dynamical Models
-A recopilation of different models of dynamical systems simulated in NetLogo.
+A recopilation of different models of [dynamical systems](https://en.wikipedia.org/wiki/Dynamical_system) simulated in NetLogo.
 
 1. [Cell competence](https://github.com/sgalella/DynamicalModels/blob/master/images/Cell_Competence.jpg)
 
