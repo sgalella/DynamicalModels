@@ -15,3 +15,7 @@ A recopilation of different models of [dynamical systems](https://en.wikipedia.o
   	<img width="200" height="200"src="images/Belousov_Zhabotinsky.gif">
 </p>
 
+
+## Usage
+
+Select the values of the different parameters of the models. Press `setup` for initialize the simulation and `go` to start. For more information about each model, check the `Info`.
